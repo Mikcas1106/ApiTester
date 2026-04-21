@@ -1,0 +1,37 @@
+# ApiStorm Scenario Configuration Example
+target_url: "https://jsonplaceholder.typicode.com/posts"
+method: "GET"
+
+# Optional path to a CSV file to read variables from
+# data_file: "data.csv"
+
+# Example of headers, can use variables if CSV is provided: "Authorization: Bearer {token}"
+headers:
+  Content-Type: "application/json"
+  Accept: "*/*"
+
+# payload:
+#   title: "foo"
+#   body: "bar"
+#   userId: 1
+
+# Time to wait (in seconds) between requests for a Virtual User
+think_time: 0.1
+
+# Real-World Scenario definition using Stages
+stages:
+  # Stage 1: Ramp up to 10 users over 5 seconds
+  - duration: 5
+    target: 10
+  
+  # Stage 2: Maintain 10 users steady for 10 seconds (Steady Load)
+  - duration: 10
+    target: 10
+  
+  # Stage 3: Spike Test! Rapidly jump to 50 users for 5 seconds
+  - duration: 5
+    target: 50
+    
+  # Stage 4: Ramp down back to 0 users over 5 seconds
+  - duration: 5
+    target: 0

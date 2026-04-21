@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApiStorm Studio</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --dark: #0f0c29;
+            --mid: #302b63;
+            --light: #24243e;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, var(--dark), var(--mid), var(--light));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: white;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            padding: 30px;
+            height: 100vh;
+        }
+
+        .panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        .sidebar {
+            width: 350px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin-top: 0;
+            font-weight: 800;
+            background: -webkit-linear-gradient(var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 8px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        .stage-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .stage-row input {
+            flex: 1;
+        }
+
+        button {
+            cursor: pointer;
+            font-family: 'Outfit';
+            font-weight: 600;
+            font-size: 15px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            transition: 0.3s;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: #000;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            margin-top: 5px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+        }
+
+        .metric-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .metric-title {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .metric-val {
+            font-size: 36px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .chart-box {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Utility */
+        .color-green {
+            color: #00e676;
+        }
+
+        .color-red {
+            color: #ff3d00;
+        }
+
+        .color-yellow {
+            color: #ffea00;
+        }
+
+        .color-blue {
+            color: #00b0ff;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="panel sidebar">
+            <h1>🌩️ ApiStorm</h1>
+            <p style="color:rgba(255,255,255,0.7); font-size:14px; margin-top:-10px;">Modern Load Testing Studio</p>
+
+            <form id="configForm">
+                <div class="form-group">
+                    <label>Target Endpoint</label>
+                    <input type="text" id="target_url" value="https://jsonplaceholder.typicode.com/posts" required />
+                </div>
+                <div class="form-group">
+                    <label>HTTP Method</label>
+                    <select id="method">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>JSON Payload (Optional)</label>
+                    <textarea id="payload" rows="4">{"title": "test"}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Test Stages</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 5px; padding-left: 5px;">
+                        <div
+                            style="flex: 1; font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">
+                            Duration (Secs)</div>
+                        <div
+                            style="flex: 1; font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">
+                            Virtual Users</div>
+                    </div>
+                    <div id="stagesList">
+                        <div class="stage-row">
+                            <div style="flex:1; position:relative;"><input type="number" value="5" class="s-dur"
+                                    style="padding-right:30px;" required /><span
+                                    style="position:absolute; right:12px; top:14px; color:var(--primary); opacity:0.7; font-size:11px; font-weight:bold; pointer-events:none;">s</span>
+                            </div>
+                            <div style="flex:1; position:relative;"><input type="number" value="10" class="s-tgt"
+                                    style="padding-right:35px;" required /><span
+                                    style="position:absolute; right:12px; top:14px; color:var(--primary); opacity:0.7; font-size:11px; font-weight:bold; pointer-events:none;">VUs</span>
+                            </div>
+                        </div>
+                        <div class="stage-row">
+                            <div style="flex:1; position:relative;"><input type="number" value="10" class="s-dur"
+                                    style="padding-right:30px;" required /><span
+                                    style="position:absolute; right:12px; top:14px; color:var(--primary); opacity:0.7; font-size:11px; font-weight:bold; pointer-events:none;">s</span>
+                            </div>
+                            <div style="flex:1; position:relative;"><input type="number" value="10" class="s-tgt"
+                                    style="padding-right:35px;" required /><span
+                                    style="position:absolute; right:12px; top:14px; color:var(--primary); opacity:0.7; font-size:11px; font-weight:bold; pointer-events:none;">VUs</span>
+                            </div>
+                        </div>
+                        <div class="stage-row">
+                            <div style="flex:1; position:relative;"><input type="number" value="5" class="s-dur"
+                                    style="padding-right:30px;" required /><span
+                                    style="position:absolute; right:12px; top:14px; color:var(--primary); opacity:0.7; font-size:11px; font-weight:bold; pointer-events:none;">s</span>
+                            </div>
+                            <div style="flex:1; position:relative;"><input type="number" value="0" class="s-tgt"
+                                    style="padding-right:35px;" required /><span
+                                    style="position:absolute; right:12px; top:14px; color:var(--primary); opacity:0.7; font-size:11px; font-weight:bold; pointer-events:none;">VUs</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="addStage()">+ Add Stage</button>
+                </div>
+
+                <button type="submit" class="btn-primary" id="startBtn">▶ Launch Test</button>
+            </form>
+        </div>
+
+        <div class="panel main">
+            <div class="metrics-grid">
+                <div class="metric-card" id="card_status">
+                    <div class="metric-title">Test Status</div>
+                    <div class="metric-val" id="m_status" style="color:var(--primary); font-size:26px;">READY</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Live RPS</div>
+                    <div class="metric-val color-green" id="m_rps">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Total Requests</div>
+                    <div class="metric-val color-blue" id="m_req">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Errors</div>
+                    <div class="metric-val color-red" id="m_err">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Avg Latency</div>
+                    <div class="metric-val color-yellow" id="m_lat">0 ms</div>
+                </div>
+            </div>
+
+            <div class="chart-box">
+                <canvas id="liveChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(5px); z-index:1000; align-items:center; justify-content:center;">
+        <div
+            style="background:var(--light); padding:30px; border-radius:16px; width:500px; max-width:90%; color:white; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 40px rgba(0,0,0,0.5);">
+            <h2 style="color:#ff3d00; margin-top:0;">Test Failed ❌</h2>
+            <p style="color:rgba(255,255,255,0.7);">The server responded with the following errors:</p>
+            <ul id="errorList"
+                style="background:rgba(0,0,0,0.3); padding:15px 15px 15px 35px; border-radius:8px; max-height:200px; overflow-y:auto; color:#ffea00; list-style-type:square; font-size:14px; word-wrap:break-word;">
+            </ul>
+            <button type="button" class="btn-primary"
+                onclick="document.getElementById('errorModal').style.display='none'"
+                style="margin-top:20px; background:linear-gradient(90deg, #ff3d00, #ff8a00);">Close Details</button>
+        </div>
+    </div>
+
+    <script>
+        // Chart Setup
+        Chart.defaults.color = 'rgba(255,255,255,0.7)';
+        Chart.defaults.font.family = 'Outfit';
+        const ctx = document.getElementById('liveChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'Live RPS', data: [], borderColor: '#00f2fe', tension: 0.4, fill: true, backgroundColor: 'rgba(0, 242, 254, 0.1)' }] },
+            options: {
+                responsive: true, maintainAspectRatio: false, animation: { duration: 0 },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { grid: { color: 'rgba(255,255,255,0.05)' } }
+                }
+            }
+        });
+
+        let timeLabels = 0;
+
+        function addStage() {
+            const div = document.createElement('div');
+            div.className = 'stage-row';
+            div.innerHTML = '<div style="flex:1; position:relative;"><input type="number" value="10" class="s-dur" style="padding-right:30px;" required/><span style="position:absolute; right:12px; top:14px; color:var(--primary); opacity:0.7; font-size:11px; font-weight:bold; pointer-events:none;">s</span></div><div style="flex:1; position:relative;"><input type="number" value="50" class="s-tgt" style="padding-right:35px;" required/><span style="position:absolute; right:12px; top:14px; color:var(--primary); opacity:0.7; font-size:11px; font-weight:bold; pointer-events:none;">VUs</span></div>';
+            document.getElementById('stagesList').appendChild(div);
+        }
+
+        document.getElementById('configForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('startBtn');
+            btn.disabled = true;
+            btn.innerText = 'Testing...';
+
+            // Reset Chart & Status
+            chart.data.labels = [];
+            chart.data.datasets[0].data = [];
+            chart.update();
+            timeLabels = 0;
+            document.getElementById('m_status').innerText = 'STARTING...';
+            document.getElementById('m_status').style.color = 'var(--primary)';
+            document.getElementById('card_status').style.borderColor = 'rgba(255,255,255,0.05)';
+
+            // Build Config
+            let payloadMap = null;
+            try { payloadMap = JSON.parse(document.getElementById('payload').value || "null"); } catch (e) { }
+
+            const stages = [];
+            document.querySelectorAll('.stage-row').forEach(row => {
+                stages.push({ duration: parseInt(row.querySelector('.s-dur').value), target: parseInt(row.querySelector('.s-tgt').value) });
+            });
+
+            const config = {
+                target_url: document.getElementById('target_url').value,
+                method: document.getElementById('method').value,
+                payload: payloadMap,
+                headers: { "Content-Type": "application/json" },
+                think_time: 0,
+                stages: stages
+            };
+
+            await fetch('/api/start', { method: 'POST', body: JSON.stringify(config), headers: { 'Content-Type': 'application/json' } });
+        };
+
+        // WebSocket logic
+        const ws = new WebSocket(`ws://${location.host}/ws/metrics`);
+        ws.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            if (data.status === "running" || data.status === "completed") {
+                document.getElementById('m_req').innerText = data.requests || data.total_requests || 0;
+                document.getElementById('m_err').innerText = data.errors || data.total_errors || 0;
+                document.getElementById('m_rps').innerText = Math.round(data.rps || 0);
+
+                const lat = data.avg_latency || 0;
+                document.getElementById('m_lat').innerText = lat.toFixed(1) + ' ms';
+
+                // Chart update for running state
+                if (data.status === "running") {
+                    chart.data.labels.push(timeLabels++);
+                    chart.data.datasets[0].data.push(data.rps || 0);
+                    if (chart.data.labels.length > 50) {
+                        chart.data.labels.shift();
+                        chart.data.datasets[0].data.shift();
+                    }
+                    chart.update();
+                }
+
+                const errs = data.errors || data.total_errors || 0;
+                let statusText = 'RUNNING';
+                let statusColor = 'var(--primary)';
+                if (errs > 0) {
+                    statusText = 'FAILING ⚠️';
+                    statusColor = '#ff3d00';
+                }
+
+                if (data.status === "completed") {
+                    const btn = document.getElementById('startBtn');
+                    btn.disabled = false;
+                    btn.innerText = '▶ Launch Test';
+
+                    const finalStatus = errs > 0 ? 'FAILED ❌' : 'PASSED ✅';
+                    const finalColor = errs > 0 ? '#ff3d00' : '#00e676';
+                    document.getElementById('m_status').innerText = finalStatus;
+                    document.getElementById('m_status').style.color = finalColor;
+                    document.getElementById('card_status').style.borderColor = finalColor;
+
+                    if (errs > 0) {
+                        document.getElementById('errorModal').style.display = 'flex';
+                        const list = document.getElementById('errorList');
+                        list.innerHTML = '';
+                        if (data.error_details) {
+                            for (const [msg, cnt] of Object.entries(data.error_details)) {
+                                const li = document.createElement('li');
+                                li.innerText = `${cnt} request(s) failed with: ${msg}`;
+                                li.style.marginBottom = '6px';
+                                list.appendChild(li);
+                            }
+                        } else {
+                            const li = document.createElement('li');
+                            li.innerText = `${errs} request(s) failed (details unavailable)`;
+                            list.appendChild(li);
+                        }
+                    } else {
+                        alert(`Test Completed: ${finalStatus}\nFinal RPS: ${(data.rps || 0).toFixed(1)}\nNo errors encountered!`);
+                    }
+                } else {
+                    document.getElementById('m_status').innerText = statusText;
+                    document.getElementById('m_status').style.color = statusColor;
+                }
+            }
+        };
+    </script>
+</body>
+
+</html>
