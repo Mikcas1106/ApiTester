@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse
 from typing import Dict, Any
 import uvicorn
 import yaml
+import psutil
 
 from core.runner import LoadRunner
 
@@ -50,6 +51,14 @@ async def start_test(scenario: Dict[str, Any], background_tasks: BackgroundTasks
     background_tasks.add_task(run_tests_bg, scenario)
     return {"status": "started"}
 
+@app.post("/api/stop")
+async def stop_test():
+    global test_status, active_runner
+    if test_status == "running" and active_runner:
+        active_runner.stop_event.set()
+        return {"status": "stopping"}
+    return {"error": "No test is running"}
+
 @app.websocket("/ws/metrics")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
@@ -66,14 +75,20 @@ async def websocket_endpoint(websocket: WebSocket):
                     "requests": rep.total_reqs,
                     "errors": rep.total_errors,
                     "rps": len(list(rep.recent_reqs)),
-                    "avg_latency": avg_lat * 1000
+                    "avg_latency": avg_lat * 1000,
+                    "ram_usage": psutil.virtual_memory().percent,
+                    "cpu_usage": psutil.cpu_percent()
                 }
                 await websocket.send_json(payload)
                 last_status = "running"
             elif test_status == "completed" and last_status == "running":
                 # Ensure we send the final completed status once
                 payload = final_stats.copy() if final_stats else {}
+                if "avg_latency" in payload:
+                    payload["avg_latency"] *= 1000
                 payload["status"] = "completed"
+                payload["ram_usage"] = psutil.virtual_memory().percent
+                payload["cpu_usage"] = psutil.cpu_percent()
                 await websocket.send_json(payload)
                 last_status = "completed"
             elif test_status == "idle":

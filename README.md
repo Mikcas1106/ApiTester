@@ -9,19 +9,43 @@ A powerful, modern API Load Testing tool written in Python. Optimized for real-w
 - **Live Output**: Beautiful live console metrics via `rich`.
 - **Rich Reporting**: Outputs structured HTML graphical reports with `Chart.js` & Raw CSVs.
 
-## Installation
+## System Setup & Installation
 
-1. Install requirements:
+### 1. Prerequisites
+- **Python 3.9 or higher** installed on your system.
+
+### 2. Environment Setup (Recommended)
+It is highly recommended to use a virtual environment to keep ApiStorm's dependencies isolated.
+```bash
+# Create a virtual environment
+python -m venv venv
+
+# Activate it (Windows):
+venv\Scripts\activate
+# Activate it (Mac/Linux):
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
+Install all the required background engines (`aiohttp`, `fastapi`, `psutil`, etc.):
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Run an example scenario:
+### 4. Running the ApiStorm Studio (Web UI)
+ApiStorm comes with a beautiful, real-time Glassmorphism web interface where you can dynamically build stages, monitor live WebSocket charts, and analyze host system RAM/CPU metrics.
+```bash
+python ui.py
+```
+> 👉 **Open your browser and navigate to:** `http://127.0.0.1:8000`
+
+### 5. Running the CLI (Headless Mode)
+You can optionally run tests via the Terminal—perfect for integrations into CI/CD pipelines.
 ```bash
 python main.py scenarios/example_scenario.yaml --csv output.csv --html output.html
 ```
 
-## Creating Scenarios
+## Creating YAML Scenarios
 
 Configure tests using easy-to-read YAML. See `scenarios/example_scenario.yaml` to learn about:
 - Target VUs (Virtual Users) using `stages`

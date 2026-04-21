@@ -22,13 +22,21 @@ class LoadRunner:
         if not stages: # Fallback to a default load test behavior
             stages = [{"duration": 10, "target": 1}] 
 
+        all_tasks = []
+
         for stage in stages:
+            if self.stop_event.is_set():
+                break
+                
             duration = stage.get('duration', 10)
             target_vus = stage.get('target', 1)
             stage_start = time.time()
             start_vus = len(self.vus)
 
             while time.time() - stage_start < duration:
+                if self.stop_event.is_set():
+                    break
+                    
                 elapsed = time.time() - stage_start
                 progress = elapsed / duration
                 current_target = int(start_vus + (target_vus - start_vus) * progress)
@@ -39,19 +47,25 @@ class LoadRunner:
                     v_id = len(self.vus) + 1
                     task = asyncio.create_task(vu_task(session, self.config, queue, vu_stop_event, v_id))
                     self.vus.append((task, vu_stop_event))
+                    all_tasks.append(task)
 
                 # Ramp down
                 while len(self.vus) > current_target:
                     task, vu_stop = self.vus.pop()
                     vu_stop.set() # Signals the VU to exit its loop gracefully
 
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(0.1)
 
         # Finished all stages. Stop any remaining VUs smoothly.
         for task, vu_stop in self.vus:
             vu_stop.set()
         
+        # Await ALL tasks so aiohttp.ClientSession does not abruptly kill the socket pool mid-flight
+        if all_tasks:
+            await asyncio.gather(*all_tasks, return_exceptions=True)
+            
         self.stop_event.set()
+        await asyncio.sleep(0.2)
 
     async def run(self):
         """Starts the main session and connects the runner to the reporter."""

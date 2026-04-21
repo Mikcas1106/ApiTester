@@ -87,6 +87,8 @@ class LiveReporter:
         total_time = end_ts - start_ts
         if total_time <= 0: total_time = 1.0
         
+        total_size = sum(r.get("res_size", 0) for r in self.results)
+        
         return {
             "total_requests": self.total_reqs,
             "total_errors": self.total_errors,
@@ -97,7 +99,8 @@ class LiveReporter:
             "p95": self.latencies[int(len(self.latencies) * 0.95)],
             "p99": self.latencies[int(len(self.latencies) * 0.99)],
             "min_latency": self.latencies[0],
-            "max_latency": self.latencies[-1]
+            "max_latency": self.latencies[-1],
+            "total_data_mb": total_size / (1024 * 1024)
         }
 
     def save_csv(self, filename="results.csv"):
